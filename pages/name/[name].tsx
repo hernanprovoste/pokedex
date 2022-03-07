@@ -86,7 +86,7 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     paths: pokemonNames.map((name) => ({
       params: { name },
     })),
-    fallback: false,
+    fallback: 'blocking',
   }
 }
 
@@ -95,6 +95,16 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { name } = params as { name: string } // se tipea el as { id: string } para mejor lectura y no hacerlo en el GetStaticProps
   // const { data } = await pokeApi.get<Pokemon>(`/pokemon/${name}`)
 
+  const pokemon = await getPokemonInfo(name)
+
+  if (!pokemon) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    }
+  }
   // // Optimization calls
   // const pokemon = {
   //   id: data.id,
@@ -104,7 +114,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   return {
     props: {
-      pokemon: await getPokemonInfo(name),
+      pokemon,
     },
   }
 }
